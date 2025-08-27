@@ -118,6 +118,24 @@ app.put('/inventory/:id', async (req, res) => {
   }
 })
 
+app.delete('/inventory/:id', async (req, res) => {
+  try {
+    await ensureTable()
+    const id = Number(req.params.id)
+    if (!Number.isFinite(id) || id <= 0) {
+      return res.status(400).json({ error: 'Invalid id' })
+    }
+    const [result] = await pool.query('DELETE FROM inventory WHERE id = ?', [id])
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Not found' })
+    }
+    res.status(204).end()
+  } catch (e) {
+    console.error(e)
+    res.status(500).json({ error: String(e) })
+  }
+})
+
 app.listen(PORT, () => {
   console.log(`API server listening on http://localhost:${PORT}`)
 })
